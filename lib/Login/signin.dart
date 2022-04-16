@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ct_helpline/Login/signup.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -83,12 +84,11 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children:<Widget> [
               Container(
-                height: MediaQuery.of(context).size.height / 5,
+                height: MediaQuery.of(context).size.height / 4,
                 decoration: BoxDecoration(),
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: SvgPicture.asset("images/login.svg",
-                  ),
+                  child: AnimatedImage()
                 ),
               ),
               SizedBox(height: 10,),
@@ -155,6 +155,35 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+              SizedBox(height: 20,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+
+                children: [
+                  Text("Don't Have account?",style: TextStyle(
+
+                  ),),
+                  SizedBox(width: 10,),
+                  GestureDetector(
+                    onTap: (){
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=> SignUP(),),);
+                      /*Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(
+
+
+                      );*/
+                    },
+                    child: Text(
+                      "Sign Up",style: TextStyle(
+
+                color: Colors.deepOrange,
+                fontWeight: FontWeight.bold,
+                      fontSize: 16
+
+              ),),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,),
 
             ],
           ),
@@ -206,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
               errorText: _validate ? 'Password Can\'t Be Empty' : null,
 
               contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-              enabledBorder: UnderlineInputBorder(
+              enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide(color: Colors.grey)
               ),
@@ -245,7 +274,41 @@ class _LoginScreenState extends State<LoginScreen> {
       ],
     );
   }
+  
 }
+class AnimatedImage extends StatefulWidget {
+  const AnimatedImage({Key? key}) : super(key: key);
+
+  @override
+  State<AnimatedImage> createState() => _AnimatedImageState();
+}
+
+class _AnimatedImageState extends State<AnimatedImage> with SingleTickerProviderStateMixin {
+  late final AnimationController _controller =AnimationController(vsync: this,
+  duration: const Duration(
+    seconds: 1),
+  )..repeat(reverse: true);
+  late Animation<Offset> _animation=Tween(
+    begin: Offset(0,0.08),
+    end: Offset(0,0.08),
+  ).animate(_controller);
+  
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SlideTransition(position: _animation,
+    child:SvgPicture.asset("images/login.svg",
+    ),
+    );
+  }
+}
+
 /*
 
  */
