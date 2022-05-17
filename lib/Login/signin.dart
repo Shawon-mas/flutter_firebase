@@ -59,75 +59,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    user=_auth.authStateChanges().listen((user) {
-      if(user!=null)
-      {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => Hompage()));
 
-
-
-      }
-      
-
-    });
-  }
-      /* login(String email,String password)async{
-         FirebaseAuth firebaseAuth=FirebaseAuth.instance;
-         final FirebaseUser user=(await firebaseAuth.signInWithCredential(email,))
-       }*/
-  /*void login(var num,var pass) async{
-    try{
-      Response response=await post(
-        Uri.parse('https://admin.cyberteens.app/api/CC/User/Login'),
-        body: {
-          'number' : num,
-          'password': pass
-        }
-      );
-      if(response.statusCode == 200)
-        {
-          var data=jsonDecode(response.body.toString());
-          var result=data['data'];
-          if(result!=null)
-          {
-            Fluttertoast.showToast(
-                msg: "Login Success",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.green,
-                textColor: Colors.white,
-                fontSize: 16.0
-            );
-
-         Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(
-           number:number.text,
-           password: password.text,
-
-       ),),);
-
-          }else{
-            Fluttertoast.showToast(
-                msg: "Login Error",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM,
-                timeInSecForIosWeb: 1,
-                backgroundColor: Colors.red,
-                textColor: Colors.white,
-                fontSize: 16.0
-            );
-          }
-
-        }
-    }catch(e){
-      print(e.toString());
-    }
-
-  }*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(

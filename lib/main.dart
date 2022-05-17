@@ -8,11 +8,9 @@ import 'Login/signin.dart';
    await Firebase.initializeApp
      (
 
-
      );
 
-   runApp(
-       MaterialApp(home: LoginScreen(),
+   runApp(MaterialApp(home: LoginScreen(),
          debugShowCheckedModeBanner: false,
        ));
  }
