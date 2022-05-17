@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:ct_helpline/Login/signup.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,12 +20,66 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  late StreamSubscription<User?> user;
   bool _isObscure = true;
-  bool _validate = false;
-  TextEditingController number=TextEditingController();
-  TextEditingController password=TextEditingController();
+  final _auth = FirebaseAuth.instance;
 
-  void login(var num,var pass) async{
+  //bool _validate = false;
+  TextEditingController email=TextEditingController();
+  TextEditingController password=TextEditingController();
+  final formKey=GlobalKey<FormState>();
+  void login(String email,String password) async{
+    try{
+     final user= await _auth.signInWithEmailAndPassword(
+          email: email, password: password);
+
+
+      Fluttertoast.showToast(
+          msg: "Login Successful",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(email: email,),),);
+    }on FirebaseAuthException catch(e){
+      Fluttertoast.showToast(
+          msg: '${e.message}',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+    }
+
+
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    user=_auth.authStateChanges().listen((user) {
+      if(user!=null)
+      {
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => Hompage()));
+
+
+
+      }
+      
+
+    });
+  }
+      /* login(String email,String password)async{
+         FirebaseAuth firebaseAuth=FirebaseAuth.instance;
+         final FirebaseUser user=(await firebaseAuth.signInWithCredential(email,))
+       }*/
+  /*void login(var num,var pass) async{
     try{
       Response response=await post(
         Uri.parse('https://admin.cyberteens.app/api/CC/User/Login'),
@@ -48,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 fontSize: 16.0
             );
 
-       Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(
+         Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(
            number:number.text,
            password: password.text,
 
@@ -71,7 +127,7 @@ class _LoginScreenState extends State<LoginScreen> {
       print(e.toString());
     }
 
-  }
+  }*/
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,10 +193,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 50,
                     onPressed: () {
                       setState(() {
-                        number.text.isEmpty ? _validate = true : _validate = false;
-                        password.text.isEmpty ? _validate = true : _validate = false;
+                        if (formKey.currentState!.validate()) {
+                          print("Okkkkkkkkkkkkkkkkkkkkkkkkkk");
+
+                        } else {
+                          print("Something wrong");
+                        }
+                        login(email.text,password.text);
+                       /* number.text.isEmpty ? _validate = true : _validate = false;
+                        password.text.isEmpty ? _validate = true : _validate = false;*/
                       });
-                      login(number.text,password.text);
+
 
                     },
                     color: Colors.yellow,
@@ -192,19 +255,27 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
   Widget makeInput(){
-    return Column(
+    return Form(
+      key: formKey,
+      child: Column(
 
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget> [
         SizedBox(height: 5,),
         TextFormField(
-          keyboardType: TextInputType.number,
-          controller: number,
+          validator: (value){
+            if(!value!.contains("@"))
+            {
+              return "Enter a valid email Address";
+            }
+          },
+          keyboardType: TextInputType.emailAddress,
+          controller: email,
           decoration: InputDecoration(
-            prefixIcon: Icon(Icons.call),
-               labelText: "Enter Number",
-               hintText: "Enter your Number",
-              errorText: _validate ? 'Number Can\'t Be Empty' : null,
+            prefixIcon: Icon(Icons.email),
+               labelText: "Enter Email",
+               hintText: "Enter your Email",
+            /*  errorText: _validate ? 'Number Can\'t Be Empty' : null,*/
               contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -218,6 +289,17 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
         SizedBox(height: 20,),
         TextFormField(
+          validator: (value) {
+            if (value!.isEmpty) {
+              return "Enter your password";
+            }
+            if (value.length > 10) {
+              return " Password length does not exist";
+            }
+            if (value.length < 6) {
+              return "Minimum password length is 6";
+            }
+          },
           controller: password,
           obscureText:_isObscure,
           decoration: InputDecoration(
@@ -228,52 +310,89 @@ class _LoginScreenState extends State<LoginScreen> {
                   _isObscure = !_isObscure;
                 });
 
-              }, icon: Icon(_isObscure?Icons.visibility : Icons.visibility_off,)),
-              hoverColor: Colors.red,
-              labelText: "Enter Password",
-              hintText: "Enter your Password",
-              errorText: _validate ? 'Password Can\'t Be Empty' : null,
+                }, icon: Icon(_isObscure?Icons.visibility : Icons.visibility_off,)),
+                hoverColor: Colors.red,
+                labelText: "Enter Password",
+                hintText: "Enter your Password",
+                /*errorText: _validate ? 'Password Can\'t Be Empty' : null,*/
 
-              contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
-              enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.grey)
-              ),
-              border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.grey)
-              )
-          ),
-        ),
-        SizedBox(height: 10,),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Padding(
-
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                "Forgot Password?",
-                style: TextStyle(
-                  shadows: [
-                    Shadow(
-                        color: Colors.black,
-                        offset: Offset(0, -5))
-                  ],
-                  color: Colors.transparent,
-                  decoration:
-                  TextDecoration.underline,
-                  decorationColor: Colors.black,
-                  decorationThickness: 2,
-
+                contentPadding: EdgeInsets.symmetric(vertical: 0,horizontal: 10),
+                enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: Colors.grey)
                 ),
-              ),
-            )
-          ],
-        )
-      ],
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20),
+                    borderSide: BorderSide(color: Colors.grey)
+                )
+            ),
+          ),
+        SizedBox(height: 10,),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Padding(
+
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    shadows: [
+                      Shadow(
+                          color: Colors.black,
+                          offset: Offset(0, -5))
+                    ],
+                    color: Colors.transparent,
+                    decoration:
+                    TextDecoration.underline,
+                    decorationColor: Colors.black,
+                    decorationThickness: 2,
+
+                  ),
+                ),
+              )
+            ],
+          )
+        ],
+      ),
     );
   }
+
+  /*void login(String mail, String pass) {
+    *//*mail="abc@gmail.com";
+    pass="123456";*//*
+
+   *//* if(mail=="abc@gmail.com" && pass=="123456" )
+    {
+      Fluttertoast.showToast(
+          msg: "Login Success",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.green,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Hompage(
+        number:email.text,
+        password:password.text,
+      ),),);
+    }else{
+      Fluttertoast.showToast(
+          msg: "Wrong Credentials",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0
+      );
+    }*//*
+
+
+
+  }*/
   
 }
 class AnimatedImage extends StatefulWidget {
@@ -289,7 +408,7 @@ class _AnimatedImageState extends State<AnimatedImage> with SingleTickerProvider
     seconds: 1),
   )..repeat(reverse: true);
   late Animation<Offset> _animation=Tween(
-    begin: Offset(0,0.08),
+    begin: Offset.zero,
     end: Offset(0,0.08),
   ).animate(_controller);
   
